@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+    {% load static %}
+<html>
+<head>
+    <title>{% block title %}My App{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@10.1.0/dist/jsoneditor.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@10.1.0/dist/jsoneditor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pgrabovets/json-view@2.7.5/dist/jsonview.min.js"></script>
+</body>
+</html>

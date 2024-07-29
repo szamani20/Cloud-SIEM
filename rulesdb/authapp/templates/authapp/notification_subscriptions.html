@@ -1,0 +1,23 @@
+{% extends 'authapp/panel.html' %}
+{% load static %}
+{% load active %}
+
+{% block panel_content %}
+<h2 class="title">Notification Subscriptions</h2>
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Topic ARN</th>
+            <th>Create Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for subscription in notification_subscriptions %}
+        <tr>
+            <td>{{ subscription.topic_arn }}</td>
+            <td>{{ subscription.create_time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

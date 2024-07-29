@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load active %}
+
+{% block title %}User Panel{% endblock %}
+
+{% block content %}
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item {% active request 'panel' %}" href="{% url 'panel' %}">
+            User Panel
+        </a>
+    </div>
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item {% active request 'logs' %}" href="{% url 'logs' %}">
+                Logs
+            </a>
+            <a class="navbar-item {% active request 'notifications' %}" href="{% url 'notifications' %}">
+                Notifications
+            </a>
+            <a class="navbar-item {% active request 'notification_subscriptions' %}" href="{% url 'notification_subscriptions' %}">
+                Notification Subscriptions
+            </a>
+            <a class="navbar-item {% active request 'rules' %}" href="{% url 'rules' %}">
+                Rules
+            </a>
+        </div>
+    </div>
+</nav>
+
+<section class="section">
+    {% block panel_content %}
+    <div class="container">
+        <h2 class="title">Welcome, {{ user.email }}</h2>
+        <a class="button is-light" href="{% url 'logout' %}">Logout</a>
+    </div>
+    {% endblock %}
+</section>
+{% endblock %}

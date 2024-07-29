@@ -1,0 +1,24 @@
+# Exclude .env and .db files in all directories
+**/.env
+**/.db
+
+# Exclude Python cache files in all directories
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Exclude PyCharm project files and caches
+.idea/
+*.iml
+*.iws
+*.ipr
+
+
+# Exclude macOS specific files
+.DS_Store
+
+# Exclude virtual environment directories in all directories
+**/venv/
+**/ENV/
+**/env/

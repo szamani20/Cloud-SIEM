@@ -1,0 +1,36 @@
+{% extends 'authapp/panel.html' %}
+{% load static %}
+{% load active %}
+
+{% block panel_content %}
+<h2 class="title">Rules</h2>
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Rule Content</th>
+            <th>Create Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rule in rules %}
+        <tr>
+            <td>
+                <div id="jsoneditor-{{ forloop.counter }}" style="width: 100%; height: 400px;"></div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var container = document.getElementById("jsoneditor-{{ forloop.counter }}");
+                        var options = {
+                            mode: 'view' // other options are 'tree', 'form', 'text', 'code'
+                        };
+                        var editor = new JSONEditor(container, options);
+                        var json = {{ rule.rule_content|safe }};
+                        editor.set(json);
+                    });
+                </script>
+            </td>
+            <td>{{ rule.create_time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

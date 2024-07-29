@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block content %}
+    <h2 class="title">Welcome to the Homepage</h2>
+    {% if user.is_authenticated %}
+        <p class="subtitle">Welcome, {{ user.email }}</p>
+        <a class="button is-primary" href="{% url 'panel' %}">Go to Your Panel</a>
+        <a class="button is-light" href="{% url 'logout' %}">Logout</a>
+    {% else %}
+        <a class="button is-primary" href="{% url 'auth_home' %}">Go to Authentication Page</a>
+    {% endif %}
+{% endblock %}

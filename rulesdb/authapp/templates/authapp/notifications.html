@@ -1,0 +1,23 @@
+{% extends 'authapp/panel.html' %}
+{% load static %}
+{% load active %}
+
+{% block panel_content %}
+<h2 class="title">Notifications</h2>
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Notification Content</th>
+            <th>Create Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for notification in notifications %}
+        <tr>
+            <td>{{ notification.notification_content }}</td>
+            <td>{{ notification.create_time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
