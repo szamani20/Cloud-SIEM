@@ -6,13 +6,14 @@ By following the Microservice Architecture, we are able to plug and play multipl
 
 ![cloudsiemarchitecture](https://github.com/szamani20/Cloud-SIEM/blob/master/images/siem/cloudsiemarchitecture.png?raw=true)
 
-As can be seen in the architecture diagram, the SIEM software can be broken down into five main micro-services, each responsible for an integral part of the SIEM workflow. Here are the five microservices:
+As can be seen in the architecture diagram, the SIEM software can be broken down into six main micro-services, each responsible for an integral part of the SIEM workflow. Here are the six microservices:
 
 1. Web Server
 2. Log Retention
 3. Real-Time Logs Processor
-4. Notifications Processor
+4. Real-Time Notifications Processor
 5. User Interface
+6. Non Real-Time Processors
 
 Each of these micro-services can be deployed independently with minimal coupling with other microservices. We will dive into more details for each micro-service in the subsequent sections.
 
@@ -129,7 +130,11 @@ The Log Retention microservice can be deployed using multiple methods:
 ---
 
 ## Real-Time Logs Processor Microservice
-The Real-Time Logs Processor microservice is tasked with consuming logs from a `RabbitMQ` consumer and processing them to extract knowledge, actionable decisions, and valuable insights. This involves notifying clients about potential security breaches, identifying unnecessary services that may be incurring costs, and detecting sub-optimal configurations that could lead to security or cost issues. The Real-Time Logs Processor makes decisions based on user-defined rules, which can be customized through the UI module to tailor how logs are processed. specifically, in this implementation, the Real-Time Logs Processor microservice will generate notification tasks for the Notifications Processor microservice if there's a match between user-defined rules and the logs coming from their AWS cloud.
+The Real-Time Logs Processor microservice is tasked with consuming logs from a `RabbitMQ` consumer and processing them to extract knowledge, actionable decisions, and valuable insights. This involves notifying clients about potential security breaches, identifying unnecessary services that may be incurring costs, and detecting sub-optimal configurations that could lead to security or cost issues.
+
+The Real-Time Logs Processor makes decisions based on user-defined rules, which can be customized through the UI module to tailor how logs are processed. Additionally, the Real-Time Logs Processor also takes into account the intelligence shared by the Threat Detection Machine Learning model, deployed to `AWS SageMaker`.
+
+The Real-Time Logs Processor microservice will generate notification tasks for the Real-Time Notifications Processor microservice if the Threat Detection Machine Learning model has a high confidence in detecting a threat and/or if there's a match between user-defined rules and the logs coming from their AWS cloud. 
 
 ![realtimeprocessor](https://github.com/szamani20/Cloud-SIEM/blob/master/images/architecture/realtimeprocessor.png?raw=true)
 
@@ -137,9 +142,11 @@ The Real-Time Logs Processor microservice is tasked with consuming logs from a `
 ### Overview
 The Real-Time Logs Processor microservice is responsible for reading logs from a RabbitMQ fanout exchange, which were produced by the Web Server microservice, and fully process them according to user-defined rules to extract knowledge and action points.
 
-The Real-Time Logs Processor microservice will automatically consume logs from RabbitMQ and process them according to user-defined rules that are extracted from a PostgreSQL database connected to the UI where customers are able to define their rules.
+The Real-Time Logs Processor microservice will automatically consume logs from RabbitMQ and process them according to user-defined rules that are extracted from a PostgreSQL database connected to the UI where AWS clients are able to define their rules.
 
 The Real-Time Logs Processor microservice is also capable of receiving all updates to user-defined rules in real-time whenever they happen on the UI application.
+
+In addition to user-defined rules, the Real-Time Logs Processor is also powered by the intelligence it receives from a threat detection machine learning model.
 
 ### Directory
 - Location: `./realtimeconsumer/`
@@ -147,6 +154,8 @@ The Real-Time Logs Processor microservice is also capable of receiving all updat
 ### Technology Stack
 - PostgreSQL
 - RabbitMQ
+- AWS SageMaker
+- Anomaly Detection ML Models
 
 ### Deployment Options
 The Real-Time Logs Processor microservice can be deployed using multiple methods:
@@ -167,14 +176,16 @@ The Real-Time Logs Processor microservice can be deployed using multiple methods
 
 ---
 
-## Notifications Processor Microservice
-The Notifications Processor microservice is tasked with consuming notification actions from a `RabbitMQ` consumer and processing them to dispatch said notifications to the subscribers that AWS clients have defined in the UI application. Specifically, the current implementation of the Notifications Processor microservice consumes notification actions that were produced by the Real-Time Logs Processor microservice and will utilize AWS SNS service to dispatch them to the subscribed clients. Notification subscriptions are defined by users on the `Notification Subscriptions` panel in the UI application where users have access to all of their data.
+## Real-Time Notifications Processor Microservice
+The Real-Time Notifications Processor microservice is tasked with consuming notification actions from a `RabbitMQ` consumer and processing them to dispatch said notifications to the subscribers that AWS clients have defined in the UI application. Specifically, the current implementation of the Notifications Processor microservice consumes notification actions that were produced by the Real-Time Logs Processor microservice and will utilize AWS SNS service to dispatch them to the subscribed clients.
+
+Notification subscriptions are defined by users on the `Notification Subscriptions` panel in the UI application where users have access to all of their data.
 
 ![notificationsporcessor](https://github.com/szamani20/Cloud-SIEM/blob/master/images/architecture/notificationsporcessor.png?raw=true)
 
 
 ### Overview
-The Notifications Processor microservice is responsible for reading notification actions produced by the real-time logs processor microservice and dispatching them according to the user-defined notification subscriptions (AWS SNS Topics)
+The Real-Time Notifications Processor microservice is responsible for reading notification actions produced by the real-time logs processor microservice and dispatching them according to the user-defined notification subscriptions (AWS SNS Topics)
 
 ### Directory
 - Location: `./notificationsconsumer/`
@@ -185,7 +196,7 @@ The Notifications Processor microservice is responsible for reading notification
 - Boto3
 
 ### Deployment Options
-The Notifications Processor Microservice can be deployed using multiple methods:
+The Real-Time Notifications Processor Microservice can be deployed using multiple methods:
 1. **Local Deployment:** Suitable for testing.
 2. **Manual Deployment:** On on-premise servers.
 3. **Cloud Deployment:** On cloud-based infrastructure.
@@ -250,6 +261,19 @@ The User Interface Microservice can be deployed using multiple methods:
    ```bash
    python manage.py runserver
 
+---
+
+## Non Real-Time Processors Microservice
+The Non Real-Time Processors microservice is responsible for handling potential threats that are non-urgent. Threats that are detection by the threat detection ML model with a lower confidence score are considered as non real-time threats that can go through extra or even manual processing, before a notification is dispatched to clients.
+
+The non real-time processor microservice works very similarly to the real-time log processor microservice combined with the real-time notification processor, but with the real-time component being removed.
+
+Non real-time threats are further processed by an EC2 instance that can be scheduled to run regularly, depending on the clients preferences.
+
+![NonRealTimeProcessors](https://github.com/szamani20/Cloud-SIEM/blob/master/images/architecture/NonRealTimeProcessors.png?raw=true)
+
+---
+
 ### Admin Page Album
 
 The following are screenshots from different sections of the Admin Management Panel powered by the UI Microservice.
@@ -292,7 +316,7 @@ The following are screenshots from different sections of the Admin Management Pa
 
 ### Client Page Album
 
-The following are screenshots from different sections of the Customer Management Panel powered by the UI Microservice.
+The following are screenshots from different sections of the AWS Client Management Panel powered by the UI Microservice.
 
 #### Client Login Panel
 <div style="display: flex; overflow-x: auto; white-space: nowrap;">
